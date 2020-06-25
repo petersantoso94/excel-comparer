@@ -9,3 +9,6 @@
 td {
   border: 0.1em solid black;
 }
+.draggable {
+  cursor: pointer;
+}
