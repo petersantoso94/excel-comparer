@@ -73,9 +73,50 @@ function App() {
     const sheet = evt.target.value;
     handler(sheet);
   };
-  const onSort = (sortedList) => {
-    console.log("sortedList", sortedList);
-    console.log("original", headerFile1);
+  const onSort = (sortedList) => {};
+  const ComparingHandler = (evt) => {
+    let diffs1 = file1Data[selectedSheet1].map((a) => [...a]);
+    let diffs2 = file2Data[selectedSheet2].map((a) => [...a]);
+    let sameIdx1 = 0;
+    let sameIdx2 = 0;
+    headerFile1.forEach((head1, idx) => {
+      if (head1.rank === 0) {
+        sameIdx1 = idx;
+        return;
+      }
+    });
+    headerFile2.forEach((head2, idx) => {
+      if (head2.rank === 0) {
+        sameIdx2 = idx;
+        return;
+      }
+    });
+    file1Data[selectedSheet1].forEach((fl1, id1) => {
+      if (id1 > 0) {
+        // only compare row data
+        file2Data[selectedSheet2].forEach((fl2, id2) => {
+          if (id2 > 0 && fl1[sameIdx1] === fl2[sameIdx2]) {
+            // only compare row data with same data in compareable column
+            headerFile1.forEach((head1, i1) => {
+              headerFile2.forEach((head2, i2) => {
+                if (
+                  head1.rank > 0 &&
+                  head2.rank > 0 &&
+                  head1.rank === head2.rank
+                ) {
+                  if (fl1[i1] === fl2[i2]) {
+                    delete diffs1[id1][i1];
+                    delete diffs2[id2][i2];
+                  }
+                }
+              });
+            });
+          }
+        });
+      }
+    });
+    console.log("diffs1", diffs1);
+    console.log("diffs2", diffs2);
   };
   // if there is file data, start to separate the sheet and header
   if (file1Data && file2Data) {
@@ -200,6 +241,7 @@ function App() {
               color="primary"
               size="medium"
               startIcon={<Icon>search</Icon>}
+              onClick={ComparingHandler}
               disabled={headerFile2.length === 0 || headerFile1.length === 0}
             >
               Compare
