@@ -3,6 +3,12 @@ import readXlsxFile from "read-excel-file";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -14,6 +20,13 @@ import Icon from "@material-ui/core/Icon";
 import DragSortableList from "react-drag-sortable";
 import "./App.css";
 
+function uuidv4() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -30,12 +43,17 @@ const useStyles = makeStyles((theme) => ({
   selectEmpty: {
     marginTop: theme.spacing(2),
   },
+  table: {
+    minWidth: 850,
+  },
 }));
 function App() {
   const [file1Data, setfile1Data] = useState({});
   const [file2Data, setfile2Data] = useState({});
   const [selectedSheet1, setselectedSheet1] = useState("");
   const [selectedSheet2, setselectedSheet2] = useState("");
+  const [diff1, setdiff1] = useState([]);
+  const [diff2, setdiff2] = useState([]);
   const headerFile1 = [];
   const headerFile2 = [];
   const sheetFile1Component = [];
@@ -64,7 +82,7 @@ function App() {
   };
   const pushSheetData = (key, sheetComponent) => {
     sheetComponent.push(
-      <option value={key} key={key + new Date().getMilliseconds}>
+      <option value={key} key={key + uuidv4()}>
         {key}
       </option>
     );
@@ -105,8 +123,8 @@ function App() {
                   head1.rank === head2.rank
                 ) {
                   if (fl1[i1] === fl2[i2]) {
-                    delete diffs1[id1][i1];
-                    delete diffs2[id2][i2];
+                    diffs1[id1][i1] = "-";
+                    diffs2[id2][i2] = "-";
                   }
                 }
               });
@@ -115,8 +133,8 @@ function App() {
         });
       }
     });
-    console.log("diffs1", diffs1);
-    console.log("diffs2", diffs2);
+    setdiff1([...diffs1]);
+    setdiff2([...diffs2]);
   };
   // if there is file data, start to separate the sheet and header
   if (file1Data && file2Data) {
@@ -194,7 +212,43 @@ function App() {
             ) : (
               <></>
             )}
-            <p>Data:{JSON.stringify(file1Data)}</p>
+            <TableContainer component={Paper}>
+              <Table className={classes.table} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    {diff1.map((row, idx) => {
+                      if (idx === 0) {
+                        let result = [];
+                        row.forEach((x) => {
+                          result.push(
+                            <TableCell key={uuidv4()}>{x}</TableCell>
+                          );
+                        });
+                        return result;
+                      }
+                    })}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {diff1.map((row, idx) => {
+                    let result = [];
+                    if (idx > 0) {
+                      result.push(
+                        <TableRow key={"1" + uuidv4()}>
+                          {row.map((x) => {
+                            result.push(
+                              <TableCell key={x + uuidv4()}>{x}</TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+
+                      return result;
+                    }
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Paper>
         </Grid>
         <Grid item xs={6}>
@@ -231,7 +285,43 @@ function App() {
             ) : (
               <></>
             )}
-            <p>Data:{JSON.stringify(file2Data)}</p>
+            <TableContainer component={Paper}>
+              <Table className={classes.table} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    {diff2.map((row, idx) => {
+                      if (idx === 0) {
+                        let result = [];
+                        row.forEach((x) => {
+                          result.push(
+                            <TableCell key={x + uuidv4()}>{x}</TableCell>
+                          );
+                        });
+                        return result;
+                      }
+                    })}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {diff2.map((row, idx) => {
+                    let result = [];
+                    if (idx > 0) {
+                      result.push(
+                        <TableRow key={"2" + uuidv4()}>
+                          {row.map((x) => {
+                            result.push(
+                              <TableCell key={x + uuidv4()}>{x}</TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+
+                      return result;
+                    }
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Paper>
         </Grid>
         <Grid item xs={12}>
