@@ -59,11 +59,12 @@ function App() {
   const sheetFile1Component = [];
   const sheetFile2Component = [];
   const classes = useStyles();
-  const FileOnChangeHandler = (evt, setFileFunction) => {
+  const FileOnChangeHandler = (evt, setFileFunction, setSelectedSheetFunction) => {
     let file1 = evt.target.files;
     if (!file1 || file1.length === 0) {
       return;
     }
+    setSelectedSheetFunction("")
     let sheetObject = {};
     readXlsxFile(file1[0], { getSheets: true }).then((sheets) => {
       sheets.forEach((sheet) => {
@@ -183,7 +184,7 @@ function App() {
             <p>File Excel 1</p>
             <input
               type="file"
-              onChange={(e) => FileOnChangeHandler(e, setfile1Data)}
+              onChange={(e) => FileOnChangeHandler(e, setfile1Data, setselectedSheet1)}
             ></input>
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="sheet-from-file1">
@@ -256,7 +257,7 @@ function App() {
             <p>File Excel 2</p>
             <input
               type="file"
-              onChange={(e) => FileOnChangeHandler(e, setfile2Data)}
+              onChange={(e) => FileOnChangeHandler(e, setfile2Data,setselectedSheet2)}
             ></input>
             <FormControl className={classes.formControl}>
               <InputLabel htmlFor="sheet-from-file2">
