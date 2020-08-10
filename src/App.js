@@ -123,7 +123,7 @@ function App() {
                   head2.rank > 0 &&
                   head1.rank === head2.rank
                 ) {
-                  if (fl1[i1] === fl2[i2]) {
+                  if (fl1[i1] == fl2[i2]) {
                     diffs1[id1][i1] = "-";
                     diffs2[id2][i2] = "-";
                   }
