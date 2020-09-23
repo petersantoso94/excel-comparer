@@ -133,6 +133,8 @@ function App() {
     // reset the diff on change
     setdiff1([]);
     setdiff2([]);
+    setselectedDiffColumn1(0);
+    setselectedDiffColumn2(0);
     handler(evt.target.value);
   };
   const onSort = (sortedList) => {};
