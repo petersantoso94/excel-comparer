@@ -54,6 +54,9 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     color: theme.palette.text.secondary,
   },
+  grid: {
+    marginLeft: theme.spacing(1),
+  },
   formControl: {
     margin: theme.spacing(1),
     width: "80%",
@@ -75,6 +78,8 @@ function App() {
   const [selectedSheet2, setselectedSheet2] = useState("");
   const [selectedColumn1, setselectedColumn1] = useState(0);
   const [selectedColumn2, setselectedColumn2] = useState(0);
+  const [selectedDiffColumn1, setselectedDiffColumn1] = useState(0);
+  const [selectedDiffColumn2, setselectedDiffColumn2] = useState(0);
   const [diff1, setdiff1] = useState([]);
   const [diff2, setdiff2] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -85,6 +90,8 @@ function App() {
   const sheetFile2Component = [];
   const headerFile1Component = [];
   const headerFile2Component = [];
+  const diff1ColumnComponent = [];
+  const diff2ColumnComponent = [];
   const classes = useStyles();
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -155,6 +162,19 @@ function App() {
     setdiff2([...diffs2]);
     setLoading(false);
   };
+  const addDifferentColumn = (diffArray, headerFile, component) => {
+    diffArray.forEach((diff, row) => {
+      let caughtIdx = [-1];
+      diff.forEach((cell, col) => {
+        if (cell !== "-" && !caughtIdx.includes(col) && row > 0) {
+          // push to column array if there is any diff
+          pushOptionData(headerFile[col], component, col);
+          // add col in caughtIdx array so it wont search the same col
+          caughtIdx.push(col);
+        }
+      });
+    });
+  };
   // if there is file data, start to separate the sheet and header
   if (file1Data && file2Data) {
     Object.keys(file1Data).forEach((key) =>
@@ -178,11 +198,17 @@ function App() {
       headerFile2.push(header);
     });
   }
+  if (diff1 && diff1.length > 0) {
+    addDifferentColumn(diff1, headerFile1, diff1ColumnComponent);
+  }
+  if (diff2 && diff2.length > 0) {
+    addDifferentColumn(diff2, headerFile2, diff2ColumnComponent);
+  }
   return (
     <div className={classes.root}>
       <Grid
         container
-        spacing={3}
+        spacing={1}
         direction="row"
         justify="center"
         alignItems="center"
@@ -299,6 +325,28 @@ function App() {
                 </Tabs>
               </AppBar>
               <TabPanel value={tabValue} index={0}>
+                <Box mb={3}>
+                  <Grid item xs={3}>
+                    <FormControl className={classes.formControl}>
+                      <InputLabel htmlFor="column-with-differences">
+                        Column with differences
+                      </InputLabel>
+                      <Select
+                        native
+                        value={selectedDiffColumn1}
+                        onChange={(e) => {
+                          setselectedDiffColumn1(e.target.value);
+                        }}
+                        inputProps={{
+                          id: "column-with-differences",
+                        }}
+                      >
+                        <option aria-label="None" value={0} />
+                        {diff1ColumnComponent}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Box>
                 <TableContainer component={Paper}>
                   <Table className={classes.table} aria-label="simple table">
                     <TableHead>
@@ -306,10 +354,16 @@ function App() {
                         {diff1.map((row, idx) => {
                           if (idx === 0) {
                             let result = [];
-                            row.forEach((x) => {
-                              result.push(
-                                <TableCell key={uuidv4()}>{x}</TableCell>
-                              );
+                            row.forEach((x, colidx) => {
+                              if (
+                                selectedDiffColumn1 == 0 ||
+                                colidx === selectedColumn1 ||
+                                (selectedDiffColumn1 > 0 &&
+                                  selectedDiffColumn1 == colidx)
+                              )
+                                result.push(
+                                  <TableCell key={uuidv4()}>{x}</TableCell>
+                                );
                             });
                             return result;
                           }
@@ -320,11 +374,21 @@ function App() {
                       {diff1.map((row, idx) => {
                         let result = [];
                         if (idx > 0) {
+                          let colResult = [];
+                          row.forEach((x, colidx) => {
+                            if (
+                              selectedDiffColumn1 == 0 ||
+                              colidx === selectedColumn1 ||
+                              (selectedDiffColumn1 > 0 &&
+                                selectedDiffColumn1 == colidx)
+                            )
+                              colResult.push(
+                                <TableCell key={x + uuidv4()}>{x}</TableCell>
+                              );
+                          });
                           result.push(
                             <TableRow key={"1" + uuidv4()}>
-                              {row.map((x) => (
-                                <TableCell key={x + uuidv4()}>{x}</TableCell>
-                              ))}
+                              {colResult}
                             </TableRow>
                           );
 
@@ -336,6 +400,28 @@ function App() {
                 </TableContainer>
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
+                <Box mb={3}>
+                  <Grid item xs={3}>
+                    <FormControl className={classes.formControl}>
+                      <InputLabel htmlFor="column-with-differences2">
+                        Column with differences
+                      </InputLabel>
+                      <Select
+                        native
+                        value={selectedDiffColumn2}
+                        onChange={(e) => {
+                          setselectedDiffColumn2(e.target.value);
+                        }}
+                        inputProps={{
+                          id: "column-with-differences2",
+                        }}
+                      >
+                        <option aria-label="None" value={0} />
+                        {diff2ColumnComponent}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Box>
                 <TableContainer component={Paper}>
                   <Table className={classes.table} aria-label="simple table">
                     <TableHead>
@@ -343,10 +429,16 @@ function App() {
                         {diff2.map((row, idx) => {
                           if (idx === 0) {
                             let result = [];
-                            row.forEach((x) => {
-                              result.push(
-                                <TableCell key={x + uuidv4()}>{x}</TableCell>
-                              );
+                            row.forEach((x, colidx) => {
+                              if (
+                                selectedDiffColumn2 == 0 ||
+                                colidx === selectedColumn2 ||
+                                (selectedDiffColumn2 > 0 &&
+                                  selectedDiffColumn2 == colidx)
+                              )
+                                result.push(
+                                  <TableCell key={x + uuidv4()}>{x}</TableCell>
+                                );
                             });
                             return result;
                           }
@@ -357,11 +449,21 @@ function App() {
                       {diff2.map((row, idx) => {
                         let result = [];
                         if (idx > 0) {
+                          let colResult = [];
+                          row.forEach((x, colidx) => {
+                            if (
+                              selectedDiffColumn2 == 0 ||
+                              colidx === selectedColumn2 ||
+                              (selectedDiffColumn2 > 0 &&
+                                selectedDiffColumn2 == colidx)
+                            )
+                              colResult.push(
+                                <TableCell key={x + uuidv4()}>{x}</TableCell>
+                              );
+                          });
                           result.push(
                             <TableRow key={"2" + uuidv4()}>
-                              {row.map((x) => (
-                                <TableCell key={x + uuidv4()}>{x}</TableCell>
-                              ))}
+                              {colResult}
                             </TableRow>
                           );
 
