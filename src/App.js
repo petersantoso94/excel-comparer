@@ -148,7 +148,11 @@ function App() {
             // only compare row data with same data in compareable column
             headerFile1.forEach((_, i1) => {
               headerFile2.forEach((_, i2) => {
-                if (fl1[i1] == fl2[i2]) {
+                if (
+                  fl1[i1] == fl2[i2] &&
+                  i1 != selectedColumn1 &&
+                  i2 != selectedColumn2
+                ) {
                   diffs1[id1][i1] = "-";
                   diffs2[id2][i2] = "-";
                 }
@@ -162,11 +166,21 @@ function App() {
     setdiff2([...diffs2]);
     setLoading(false);
   };
-  const addDifferentColumn = (diffArray, headerFile, component) => {
+  const addDifferentColumn = (
+    diffArray,
+    headerFile,
+    component,
+    selectedColumn
+  ) => {
+    let caughtIdx = [-1];
     diffArray.forEach((diff, row) => {
-      let caughtIdx = [-1];
       diff.forEach((cell, col) => {
-        if (cell !== "-" && !caughtIdx.includes(col) && row > 0) {
+        if (
+          cell !== "-" &&
+          !caughtIdx.includes(col) &&
+          row > 0 &&
+          col != selectedColumn
+        ) {
           // push to column array if there is any diff
           pushOptionData(headerFile[col], component, col);
           // add col in caughtIdx array so it wont search the same col
@@ -199,10 +213,20 @@ function App() {
     });
   }
   if (diff1 && diff1.length > 0) {
-    addDifferentColumn(diff1, headerFile1, diff1ColumnComponent);
+    addDifferentColumn(
+      diff1,
+      headerFile1,
+      diff1ColumnComponent,
+      selectedColumn1
+    );
   }
   if (diff2 && diff2.length > 0) {
-    addDifferentColumn(diff2, headerFile2, diff2ColumnComponent);
+    addDifferentColumn(
+      diff2,
+      headerFile2,
+      diff2ColumnComponent,
+      selectedColumn2
+    );
   }
   return (
     <div className={classes.root}>
@@ -341,7 +365,9 @@ function App() {
                           id: "column-with-differences",
                         }}
                       >
-                        <option aria-label="None" value={0} />
+                        <option aria-label="None" value={0}>
+                          All
+                        </option>
                         {diff1ColumnComponent}
                       </Select>
                     </FormControl>
@@ -357,7 +383,7 @@ function App() {
                             row.forEach((x, colidx) => {
                               if (
                                 selectedDiffColumn1 == 0 ||
-                                colidx === selectedColumn1 ||
+                                colidx == selectedColumn1 ||
                                 (selectedDiffColumn1 > 0 &&
                                   selectedDiffColumn1 == colidx)
                               )
@@ -378,7 +404,7 @@ function App() {
                           row.forEach((x, colidx) => {
                             if (
                               selectedDiffColumn1 == 0 ||
-                              colidx === selectedColumn1 ||
+                              colidx == selectedColumn1 ||
                               (selectedDiffColumn1 > 0 &&
                                 selectedDiffColumn1 == colidx)
                             )
@@ -416,7 +442,9 @@ function App() {
                           id: "column-with-differences2",
                         }}
                       >
-                        <option aria-label="None" value={0} />
+                        <option aria-label="None" value={0}>
+                          All
+                        </option>
                         {diff2ColumnComponent}
                       </Select>
                     </FormControl>
@@ -432,7 +460,7 @@ function App() {
                             row.forEach((x, colidx) => {
                               if (
                                 selectedDiffColumn2 == 0 ||
-                                colidx === selectedColumn2 ||
+                                colidx == selectedColumn2 ||
                                 (selectedDiffColumn2 > 0 &&
                                   selectedDiffColumn2 == colidx)
                               )
@@ -453,7 +481,7 @@ function App() {
                           row.forEach((x, colidx) => {
                             if (
                               selectedDiffColumn2 == 0 ||
-                              colidx === selectedColumn2 ||
+                              colidx == selectedColumn2 ||
                               (selectedDiffColumn2 > 0 &&
                                 selectedDiffColumn2 == colidx)
                             )
